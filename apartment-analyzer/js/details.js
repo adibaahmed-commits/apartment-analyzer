@@ -41,13 +41,8 @@ async function loadDetails() {
 
   try {
     const data = await getBuildingDetails(buildingId);
-
-    let analysis = {};
-    try {
-      analysis = JSON.parse(data.analysis_json);
-    } catch (e) {
-      analysis = {};
-    }
+    const analysis = data.analysis_json || {};
+    
 
     buildingImage.src = data.image_url || "";
     buildingType.textContent = analysis.building_type || data.name || "Not detected";
