@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Building Analyzer - Details</title>
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <h1>🏢 Building Analyzer</h1>
+    <nav>
+      <a href="index.html">Upload</a>
+      <a href="history.html">History</a>
+    </nav>
+  </header>
+
+  <main>
+    <div id="loadingMessage">Loading building details...</div>
+
+    <div id="detailsContainer" style="display:none;">
+      <img id="buildingImage" src="" alt="Building photo">
+      <h2 id="buildingType">-</h2>
+      <p id="buildingSummary" class="summary"></p>
+
+      <table>
+        <tr><td>Year Built</td><td id="buildingYear">-</td></tr>
+        <tr><td>Floors</td><td id="buildingFloors">-</td></tr>
+        <tr><td>Style</td><td id="buildingStyle">-</td></tr>
+        <tr><td>Condition</td><td id="buildingCondition">-</td></tr>
+        <tr><td>Rental Price</td><td id="buildingRent">-</td></tr>
+        <tr><td>Confidence</td><td id="buildingConfidence">-</td></tr>
+      </table>
+
+      <h3>Notable Features</h3>
+      <ul id="buildingFeatures"></ul>
+
+      <h3>Amenities</h3>
+      <ul id="buildingAmenities"></ul>
+
+      <h3>Nearby Hospitals</h3>
+      <ul id="buildingHospitals"></ul>
+
+      <h3>Nearby Schools</h3>
+      <ul id="buildingSchools"></ul>
+
+      <h3>Network Coverage</h3>
+      <p id="buildingNetwork">-</p>
+
+      <a href="index.html"><button>Analyze Another</button></a>
+    </div>
+
+    <p id="errorMessage" style="display:none;">Could not load building details.</p>
+  </main>
+<script src="js/background.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/details.js"></script>
+</body>
+</html>
