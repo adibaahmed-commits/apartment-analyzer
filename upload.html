@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XTrace — Scan any building</title>
+<title>XTrace — Upload a building</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -24,35 +24,20 @@
     background:var(--void);
     color:var(--bone);
     font-family:'Space Grotesk', sans-serif;
-    overflow-x:hidden;
+    min-height:100vh;
   }
-  h1,h2,h3,.display{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    letter-spacing:-0.01em;
-  }
-  .eyebrow{
-    font-size:0.72rem;
-    letter-spacing:0.18em;
-    text-transform:uppercase;
-    color:var(--cyan);
-    font-weight:600;
-  }
+  h1,h2,.display{font-family:'Fraunces', serif;font-weight:600;letter-spacing:-0.01em;}
   a{color:inherit;text-decoration:none;}
-  .wrap{max-width:1120px;margin:0 auto;padding:0 28px;}
 
-  /* subtle noise/vignette background */
   body::before{
     content:'';
     position:fixed;inset:0;
     background:
       radial-gradient(ellipse 900px 600px at 15% -5%, rgba(232,83,107,0.14), transparent 60%),
       radial-gradient(ellipse 700px 500px at 100% 20%, rgba(94,234,212,0.06), transparent 55%);
-    pointer-events:none;
-    z-index:0;
+    pointer-events:none;z-index:0;
   }
 
-  /* ===== NAV ===== */
   nav{
     position:sticky;top:0;z-index:50;
     display:flex;align-items:center;justify-content:space-between;
@@ -61,221 +46,93 @@
     backdrop-filter:blur(14px);
     border-bottom:1px solid var(--line);
   }
-  .logo{
-    display:flex;align-items:center;gap:8px;
-    font-family:'Fraunces',serif;font-weight:700;font-size:1.3rem;
-  }
+  .logo{display:flex;align-items:center;gap:8px;font-family:'Fraunces',serif;font-weight:700;font-size:1.3rem;}
   .logo .x{color:var(--rose);}
-  .navlinks{display:flex;gap:32px;font-size:0.88rem;color:var(--mute);}
-  .navlinks a:hover{color:var(--bone);}
-  .navcta{
-    padding:9px 18px;border-radius:999px;
-    background:var(--rose);color:var(--void);
-    font-size:0.85rem;font-weight:600;
-  }
-  @media(max-width:720px){.navlinks{display:none;}}
+  .back{font-size:0.88rem;color:var(--mute);}
+  .back:hover{color:var(--bone);}
 
-  /* ===== HERO ===== */
-  .hero{
+  .wrap{
+    max-width:560px;margin:0 auto;
+    padding:80px 28px 60px;
     position:relative;z-index:1;
-    padding:100px 28px 60px;
-    display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;align-items:center;
-    max-width:1120px;margin:0 auto;
   }
-  @media(max-width:900px){.hero{grid-template-columns:1fr;padding-top:64px;text-align:left;}}
+  .eyebrow{
+    font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;
+    color:var(--cyan);font-weight:600;
+  }
+  h1{font-size:clamp(2rem,4.5vw,2.8rem);margin:14px 0 10px;}
+  .sub{color:var(--mute);font-size:0.98rem;line-height:1.6;margin-bottom:40px;}
 
-  .hero h1{
-    font-size:clamp(2.4rem,5.4vw,4.1rem);
-    line-height:1.03;
-    margin:18px 0 22px;
-  }
-  .hero h1 em{
-    font-style:italic;
-    color:var(--rose);
-  }
-  .hero p{
-    color:var(--mute);
-    font-size:1.05rem;
-    max-width:440px;
-    line-height:1.6;
-    margin-bottom:32px;
-  }
-  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;}
-  .btn-primary{
-    background:var(--rose);color:var(--void);
-    padding:14px 26px;border-radius:10px;
-    font-weight:600;font-size:0.95rem;
-    display:inline-flex;align-items:center;gap:8px;
-    box-shadow:0 8px 30px -8px rgba(232,83,107,0.55);
-    border:none;cursor:pointer;
-    transition:transform .15s ease;
-  }
-  .btn-primary:hover{transform:translateY(-2px);}
-  .btn-secondary{
-    padding:14px 22px;border-radius:10px;
-    border:1px solid var(--line);
-    color:var(--bone);font-size:0.95rem;font-weight:500;
-    display:inline-flex;align-items:center;gap:8px;
-  }
-  .btn-secondary:hover{border-color:var(--rose-dim);}
-
-  /* building scan visual */
-  .scan-stage{
-    position:relative;
-    aspect-ratio:1/1.05;
-    border-radius:20px;
-    background:linear-gradient(160deg, var(--wine), var(--void) 75%);
-    border:1px solid var(--line);
-    overflow:hidden;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .scan-stage svg{width:72%;height:auto;position:relative;z-index:2;}
-  .scanline{
-    position:absolute;left:0;right:0;height:2px;
-    background:linear-gradient(90deg, transparent, var(--cyan), transparent);
-    box-shadow:0 0 20px 4px rgba(94,234,212,0.55);
-    animation:sweep 3.4s ease-in-out infinite;
-    z-index:3;
-  }
-  @keyframes sweep{
-    0%{top:12%; opacity:0;}
-    8%{opacity:1;}
-    50%{top:85%; opacity:1;}
-    58%{opacity:0;}
-    100%{top:12%; opacity:0;}
-  }
-  .grid-dots{
-    position:absolute;inset:0;
-    background-image:radial-gradient(circle, rgba(244,233,230,0.06) 1px, transparent 1px);
-    background-size:22px 22px;
-    z-index:1;
-  }
-  .stage-tag{
-    position:absolute;top:16px;left:16px;
-    font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;
-    color:var(--cyan);
-    background:rgba(23,10,13,0.6);
-    padding:6px 10px;border-radius:999px;
-    border:1px solid rgba(94,234,212,0.25);
-    z-index:4;
-  }
-  .building-line{fill:none;stroke:var(--bone);stroke-opacity:0.75;stroke-width:1.1;}
-  .building-fill{fill:rgba(232,83,107,0.06);}
-
-  /* ===== SECTION SHARED ===== */
-  section{position:relative;z-index:1;padding:100px 0;}
-  .section-head{max-width:600px;margin-bottom:56px;}
-  .section-head h2{font-size:clamp(1.8rem,3.4vw,2.6rem);margin-top:14px;}
-  .section-head p{color:var(--mute);margin-top:14px;font-size:1rem;line-height:1.6;}
-
-  /* how it works */
-  .steps{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
-  }
-  @media(max-width:800px){.steps{grid-template-columns:1fr;}}
-  .step{
-    border:1px solid var(--line);
+  /* dropzone */
+  .dropzone{
+    border:1.5px dashed var(--line);
     border-radius:16px;
-    padding:28px 24px;
-    background:linear-gradient(180deg, rgba(61,22,32,0.4), transparent);
+    padding:48px 24px;
+    text-align:center;
+    cursor:pointer;
+    background:var(--wine);
+    transition:border-color .15s ease, background .15s ease;
     position:relative;
   }
-  .step .num{
-    font-family:'Fraunces',serif;
-    font-size:2.4rem;
-    color:var(--rose-dim);
-    display:block;
-    margin-bottom:14px;
+  .dropzone.drag{
+    border-color:var(--rose);
+    background:var(--wine-light);
   }
-  .step h3{font-size:1.15rem;margin-bottom:8px;font-weight:600;}
-  .step p{color:var(--mute);font-size:0.92rem;line-height:1.55;}
-  .step:not(:last-child)::after{
-    content:'';
-    position:absolute;top:50%;right:-24px;
-    width:24px;height:1px;
-    background:var(--line);
-    display:none;
+  .dropzone input{display:none;}
+  .dz-icon{
+    width:52px;height:52px;margin:0 auto 18px;
+    border-radius:50%;
+    background:rgba(94,234,212,0.1);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--cyan);font-size:1.4rem;
   }
-  @media(min-width:801px){.step:not(:last-child)::after{display:block;}}
+  .dz-title{font-weight:600;margin-bottom:6px;}
+  .dz-sub{color:var(--mute);font-size:0.85rem;}
 
-  /* features */
-  .features{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
-  }
-  @media(max-width:900px){.features{grid-template-columns:repeat(2,1fr);}}
-  @media(max-width:520px){.features{grid-template-columns:1fr;}}
-  .feature{
+  /* preview */
+  .preview{
+    display:none;
+    margin-top:20px;
     border:1px solid var(--line);
     border-radius:14px;
-    padding:24px;
+    overflow:hidden;
     background:var(--wine);
   }
-  .feature .icon{
-    width:38px;height:38px;
-    border-radius:10px;
-    background:rgba(94,234,212,0.12);
-    display:flex;align-items:center;justify-content:center;
-    color:var(--cyan);
-    margin-bottom:16px;
-    font-size:1.1rem;
-  }
-  .feature h3{font-size:1.02rem;margin-bottom:6px;font-family:'Space Grotesk';font-weight:600;}
-  .feature p{color:var(--mute);font-size:0.87rem;line-height:1.5;}
-
-  /* dashboard preview */
-  .dash-wrap{
-    border-radius:20px;
-    border:1px solid var(--line);
-    background:linear-gradient(165deg,var(--wine),var(--void));
-    padding:22px;
-    overflow:hidden;
-  }
-  .dash-topbar{display:flex;gap:6px;margin-bottom:18px;padding-left:4px;}
-  .dot{width:9px;height:9px;border-radius:50%;background:rgba(244,233,230,0.15);}
-  .dash-grid{
-    display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;
-  }
-  @media(max-width:800px){.dash-grid{grid-template-columns:1fr;}}
-  .dash-card{
-    background:rgba(23,10,13,0.55);
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:18px;
-  }
-  .dash-card .label{font-size:0.72rem;color:var(--mute);text-transform:uppercase;letter-spacing:0.08em;}
-  .dash-card .value{
-    font-family:'Fraunces',serif;font-size:1.7rem;color:var(--bone);margin-top:6px;font-weight:600;
-  }
-  .dash-card .value.accent{color:var(--cyan);}
-  .dash-card .sub{font-size:0.78rem;color:var(--mute);margin-top:4px;}
-  .dash-visual{
-    grid-column:span 1;
-    display:flex;align-items:center;justify-content:center;
-    position:relative;
-    min-height:180px;
-  }
-  .dash-visual svg{width:60%;}
-
-  /* CTA */
-  .cta-band{
-    text-align:center;
-    padding:90px 28px;
-    border-top:1px solid var(--line);
-  }
-  .cta-band h2{font-size:clamp(1.9rem,4vw,2.8rem);margin-bottom:18px;}
-  .cta-band p{color:var(--mute);max-width:480px;margin:0 auto 34px;line-height:1.6;}
-
-  footer{
-    border-top:1px solid var(--line);
-    padding:32px 28px;
+  .preview.show{display:block;}
+  .preview img{width:100%;display:block;max-height:280px;object-fit:cover;}
+  .preview-info{
+    padding:14px 16px;
     display:flex;justify-content:space-between;align-items:center;
-    color:var(--mute);font-size:0.82rem;
-    flex-wrap:wrap;gap:12px;
+    font-size:0.85rem;color:var(--mute);
+  }
+  .preview-info button{
+    background:none;border:none;color:var(--rose);
+    font-size:0.85rem;cursor:pointer;font-family:inherit;font-weight:600;
   }
 
-  /* reveal on scroll */
-  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease, transform .7s ease;}
-  .reveal.in{opacity:1;transform:translateY(0);}
+  .btn-primary{
+    width:100%;
+    margin-top:24px;
+    background:var(--rose);color:var(--void);
+    padding:15px 26px;border-radius:10px;
+    font-weight:600;font-size:0.98rem;
+    border:none;cursor:pointer;
+    box-shadow:0 8px 30px -8px rgba(232,83,107,0.55);
+    transition:transform .15s ease, opacity .15s ease;
+    font-family:inherit;
+  }
+  .btn-primary:hover{transform:translateY(-2px);}
+  .btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
+  .status{
+    margin-top:16px;
+    font-size:0.88rem;
+    text-align:center;
+    min-height:20px;
+  }
+  .status.error{color:var(--rose);}
+  .status.loading{color:var(--cyan);}
+  .status.success{color:var(--cyan);}
 
   ::selection{background:var(--rose);color:var(--void);}
 </style>
@@ -284,170 +141,136 @@
 
 <nav>
   <div class="logo"><span class="x">X</span>Trace</div>
-  <div class="navlinks">
-    <a href="#how">How it works</a>
-    <a href="#features">Features</a>
-    <a href="#preview">Preview</a>
-  </div>
-  <a href="upload.html" class="navcta">Scan a building</a>
+  <a href="index.html" class="back">← Back to home</a>
 </nav>
 
-<section class="hero">
-  <div>
-    <span class="eyebrow">Point-and-scan property intel</span>
-    <h1>See what a<br>building is <em>hiding</em>.</h1>
-    <p>Photograph any building and XTrace reconstructs it — type, floor count, estimated rent, and what's nearby — in under ten seconds.</p>
-    <div class="hero-actions">
-      <a href="upload.html" class="btn-primary">Upload a building photo →</a>
-      <a href="#how" class="btn-secondary">See how it works</a>
+<div class="wrap">
+  <span class="eyebrow">Upload a building photo</span>
+  <h1>Let's scan it.</h1>
+  <p class="sub">Drop a clear photo of a building's exterior below. Street-level or from across the block both work.</p>
+
+  <div class="dropzone" id="dropzone">
+    <input type="file" id="fileInput" accept="image/*" capture="environment">
+    <div class="dz-icon">↑</div>
+    <div class="dz-title">Tap to choose a photo</div>
+    <div class="dz-sub">or drag and drop — JPG, PNG, up to 10MB</div>
+  </div>
+
+  <div class="preview" id="preview">
+    <img id="previewImg" src="" alt="Selected building photo">
+    <div class="preview-info">
+      <span id="fileName"></span>
+      <button id="removeBtn" type="button">Remove</button>
     </div>
   </div>
-  <div class="scan-stage">
-    <div class="grid-dots"></div>
-    <div class="stage-tag">● scanning</div>
-    <div class="scanline"></div>
-    <svg viewBox="0 0 200 240" class="display">
-      <rect class="building-fill" x="40" y="30" width="120" height="200"/>
-      <rect class="building-line" x="40" y="30" width="120" height="200"/>
-      <line class="building-line" x1="40" y1="60" x2="160" y2="60"/>
-      <line class="building-line" x1="40" y1="90" x2="160" y2="90"/>
-      <line class="building-line" x1="40" y1="120" x2="160" y2="120"/>
-      <line class="building-line" x1="40" y1="150" x2="160" y2="150"/>
-      <line class="building-line" x1="40" y1="180" x2="160" y2="180"/>
-      <line class="building-line" x1="40" y1="210" x2="160" y2="210"/>
-      <line class="building-line" x1="70" y1="30" x2="70" y2="230"/>
-      <line class="building-line" x1="100" y1="30" x2="100" y2="230"/>
-      <line class="building-line" x1="130" y1="30" x2="130" y2="230"/>
-      <rect class="building-line" x="20" y="220" width="160" height="10"/>
-      <rect class="building-line" x="75" y="5" width="50" height="25"/>
-    </svg>
-  </div>
-</section>
 
-<section id="how">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="eyebrow">The process</span>
-      <h2>From photo to report, in three steps</h2>
-      <p>No listings, no floor plans, no login required to start. Just a camera.</p>
-    </div>
-    <div class="steps">
-      <div class="step reveal">
-        <span class="num">01</span>
-        <h3>Upload a photo</h3>
-        <p>Snap a picture of any building's exterior — street-level or from across the block.</p>
-      </div>
-      <div class="step reveal">
-        <span class="num">02</span>
-        <h3>We reconstruct it</h3>
-        <p>XTrace identifies the structure, estimates floor count, and matches it against public property data.</p>
-      </div>
-      <div class="step reveal">
-        <span class="num">03</span>
-        <h3>Get your report</h3>
-        <p>Rent estimates, unit type, and nearby facilities, delivered as a shareable dashboard.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="features">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="eyebrow">What you get</span>
-      <h2>Every scan returns four things</h2>
-    </div>
-    <div class="features">
-      <div class="feature reveal">
-        <div class="icon">◆</div>
-        <h3>Building type</h3>
-        <p>Residential, mixed-use, or commercial — classified automatically.</p>
-      </div>
-      <div class="feature reveal">
-        <div class="icon">▤</div>
-        <h3>Floor estimation</h3>
-        <p>Approximate floor count from the photo's proportions and window rows.</p>
-      </div>
-      <div class="feature reveal">
-        <div class="icon">$</div>
-        <h3>Estimated rent</h3>
-        <p>A rent range benchmarked against comparable buildings nearby.</p>
-      </div>
-      <div class="feature reveal">
-        <div class="icon">◎</div>
-        <h3>Nearby facilities</h3>
-        <p>Transit, groceries, and parks within walking distance.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="preview">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="eyebrow">The output</span>
-      <h2>Your building, laid bare</h2>
-      <p>Every scan produces a dashboard you can revisit, compare, or send to someone else.</p>
-    </div>
-    <div class="dash-wrap reveal">
-      <div class="dash-topbar">
-        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-      </div>
-      <div class="dash-grid">
-        <div class="dash-card">
-          <div class="label">Estimated rent</div>
-          <div class="value accent">$2,700</div>
-          <div class="sub">Range $2,500–$2,800 / mo</div>
-        </div>
-        <div class="dash-card">
-          <div class="label">Floors</div>
-          <div class="value">8</div>
-          <div class="sub">Residential, mixed height</div>
-        </div>
-        <div class="dash-card">
-          <div class="label">Nearby facilities</div>
-          <div class="value">12</div>
-          <div class="sub">Within a 5 min walk</div>
-        </div>
-      </div>
-      <div class="dash-visual">
-        <svg viewBox="0 0 200 200">
-          <rect class="building-fill" x="55" y="20" width="90" height="160"/>
-          <rect class="building-line" x="55" y="20" width="90" height="160"/>
-          <line class="building-line" x1="55" y1="45" x2="145" y2="45"/>
-          <line class="building-line" x1="55" y1="70" x2="145" y2="70"/>
-          <line class="building-line" x1="55" y1="95" x2="145" y2="95"/>
-          <line class="building-line" x1="55" y1="120" x2="145" y2="120"/>
-          <line class="building-line" x1="55" y1="145" x2="145" y2="145"/>
-          <line class="building-line" x1="85" y1="20" x2="85" y2="180"/>
-          <line class="building-line" x1="115" y1="20" x2="115" y2="180"/>
-        </svg>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="upload" class="cta-band">
-  <span class="eyebrow">Get started</span>
-  <h2>Scan your first building</h2>
-  <p>Free to try. No account needed for your first three scans.</p>
-  <a href="#" class="btn-primary">Upload a building photo →</a>
-</section>
-
-<footer>
-  <div class="logo" style="font-size:1rem;"><span class="x">X</span>Trace</div>
-  <div>© 2026 XTrace. Property tech, made visible.</div>
-</footer>
+  <button class="btn-primary" id="scanBtn" disabled>Scan this building →</button>
+  <div class="status" id="status"></div>
+</div>
 
 <script>
-  const revealEls = document.querySelectorAll('.reveal');
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
-    });
-  }, {threshold:0.15});
-  revealEls.forEach(el=>io.observe(el));
-</script>
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const preview = document.getElementById('preview');
+  const previewImg = document.getElementById('previewImg');
+  const fileName = document.getElementById('fileName');
+  const removeBtn = document.getElementById('removeBtn');
   
+  const scanBtn = document.getElementById('scanBtn');
+  const status = document.getElementById('status');
+
+  let selectedFile = null;
+
+  // Change this to wherever your backend actually lives, e.g.
+  // "https://your-api-domain.com/buildings/upload"
+  const UPLOAD_ENDPOINT = "https://xtrace-backend.onrender.com/buildings/upload";
+
+  dropzone.addEventListener('click', () => fileInput.click());
+
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('drag');
+  });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('drag');
+    if (e.dataTransfer.files.length) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) {
+      handleFile(fileInput.files[0]);
+    }
+  });
+
+  function handleFile(file) {
+    if (!file.type.startsWith('image/')) {
+      showStatus('Please choose an image file.', 'error');
+      return;
+    }
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImg.src = e.target.result;
+      fileName.textContent = file.name;
+      preview.classList.add('show');
+      scanBtn.disabled = false;
+      showStatus('', '');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeBtn.addEventListener('click', () => {
+    selectedFile = null;
+    fileInput.value = '';
+    preview.classList.remove('show');
+    scanBtn.disabled = true;
+  });
+
+  scanBtn.addEventListener('click', async () => {
+    if (!selectedFile) return;
+
+    scanBtn.disabled = true;
+    showStatus('Scanning building…', 'loading');
+
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+
+    try {
+      const response = await fetch(UPLOAD_ENDPOINT, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed with status ' + response.status);
+      }
+
+      const data = await response.json();
+
+      // Adjust this redirect to match how your details.html expects to receive data
+      // e.g. if your backend returns { id: "123" }
+      if (data.id) {
+        window.location.href = `details.html?id=${data.id}`;
+      } else {
+        showStatus('Scan complete.', 'success');
+      }
+
+    } catch (err) {
+      console.error(err);
+      showStatus('Something went wrong. Please try again.', 'error');
+      scanBtn.disabled = false;
+    }
+  });
+
+  function showStatus(msg, type) {
+    status.textContent = msg;
+    status.className = 'status' + (type ? ' ' + type : '');
+  }
+</script>
+
 </body>
 </html>
