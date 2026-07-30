@@ -168,21 +168,19 @@
   <div class="status" id="status"></div>
 </div>
 
-<script>
+  <script>
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
   const preview = document.getElementById('preview');
   const previewImg = document.getElementById('previewImg');
   const fileName = document.getElementById('fileName');
   const removeBtn = document.getElementById('removeBtn');
-  
+
   const scanBtn = document.getElementById('scanBtn');
   const status = document.getElementById('status');
 
   let selectedFile = null;
 
-  // Change this to wherever your backend actually lives, e.g.
-  // "https://your-api-domain.com/buildings/upload"
   const UPLOAD_ENDPOINT = "https://xtrace-backend.onrender.com/buildings/upload";
 
   dropzone.addEventListener('click', () => fileInput.click());
@@ -237,7 +235,7 @@
     showStatus('Scanning building…', 'loading');
 
     const formData = new FormData();
-    formData.append('image', selectedFile);
+    formData.append('file', selectedFile); // backend expects "file", not "image"
 
     try {
       const response = await fetch(UPLOAD_ENDPOINT, {
@@ -246,15 +244,15 @@
       });
 
       if (!response.ok) {
-        throw new Error('Upload failed with status ' + response.status);
+        const errText = await response.text().catch(() => '');
+        throw new Error(`Upload failed with status ${response.status}: ${errText}`);
       }
 
       const data = await response.json();
 
-      // Adjust this redirect to match how your details.html expects to receive data
-      // e.g. if your backend returns { id: "123" }
-      if (data.id) {
-        window.location.href = `details.html?id=${data.id}`;
+      // backend returns { building_id, status, image_url }
+      if (data.building_id) {
+        window.location.href = `details.html?id=${data.building_id}`;
       } else {
         showStatus('Scan complete.', 'success');
       }
@@ -271,6 +269,3 @@
     status.className = 'status' + (type ? ' ' + type : '');
   }
 </script>
-
-</body>
-</html>
