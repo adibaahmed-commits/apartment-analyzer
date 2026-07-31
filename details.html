@@ -1,63 +1,399 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Building Analyzer - Details</title>
- <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XTrace — Building Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#170A0D;
+    --wine:#2B0F16;
+    --wine-light:#3D1620;
+    --rose:#E8536B;
+    --rose-dim:#B33D50;
+    --cyan:#5EEAD4;
+    --bone:#F4E9E6;
+    --mute:#A8858C;
+    --line:rgba(244,233,230,0.09);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--void);color:var(--bone);
+    font-family:'Space Grotesk', sans-serif;
+    min-height:100vh;
+  }
+  h1,h2,.display{font-family:'Fraunces', serif;font-weight:600;letter-spacing:-0.01em;}
+  a{color:inherit;text-decoration:none;}
+
+  body::before{
+    content:'';position:fixed;inset:0;
+    background:
+      radial-gradient(ellipse 900px 600px at 15% -5%, rgba(232,83,107,0.14), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 20%, rgba(94,234,212,0.06), transparent 55%);
+    pointer-events:none;z-index:0;
+  }
+
+  nav{
+    position:sticky;top:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 28px;
+    background:rgba(23,10,13,0.72);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{display:flex;align-items:center;gap:8px;font-family:'Fraunces',serif;font-weight:700;font-size:1.3rem;}
+  .logo .x{color:var(--rose);}
+  .back{font-size:0.88rem;color:var(--mute);}
+  .back:hover{color:var(--bone);}
+
+  .wrap{max-width:780px;margin:0 auto;padding:50px 24px 80px;position:relative;z-index:1;}
+
+  .eyebrow{
+    font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;
+    color:var(--cyan);font-weight:600;
+  }
+
+  .loading-box{text-align:center;padding:100px 20px;}
+  .spinner{
+    width:40px;height:40px;
+    border:2px solid var(--line);
+    border-top-color:var(--rose);
+    border-radius:50%;
+    margin:0 auto 24px;
+    animation:spin 0.9s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-box h2{font-size:1.4rem;margin-bottom:8px;}
+  .loading-box p{color:var(--mute);font-size:0.92rem;}
+
+  .error-box{text-align:center;padding:100px 20px;}
+  .error-box h2{color:var(--rose);font-size:1.4rem;margin-bottom:10px;}
+  .error-box p{color:var(--mute);margin-bottom:24px;}
+
+  .result{display:none;}
+  .result.show{display:block;}
+
+  .photo{
+    width:100%;border-radius:16px;border:1px solid var(--line);
+    overflow:hidden;margin-bottom:28px;aspect-ratio:16/9;background:var(--wine);
+  }
+  .photo img{width:100%;height:100%;object-fit:cover;display:block;}
+
+  h1{font-size:clamp(1.7rem,3.8vw,2.3rem);margin-bottom:6px;}
+  .meta{color:var(--mute);font-size:0.85rem;margin-bottom:20px;}
+
+  .summary{
+    background:var(--wine);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px;
+    font-size:0.95rem;
+    line-height:1.6;
+    color:var(--bone);
+    margin-bottom:32px;
+  }
+  .confidence-tag{
+    display:inline-block;
+    font-size:0.68rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--cyan);
+    border:1px solid rgba(94,234,212,0.3);
+    padding:3px 9px;
+    border-radius:999px;
+    margin-bottom:10px;
+  }
+
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+    gap:14px;
+    margin-bottom:32px;
+  }
+  .card{
+    background:var(--wine);border:1px solid var(--line);border-radius:12px;padding:18px;
+  }
+  .card .label{
+    font-size:0.7rem;color:var(--mute);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;
+  }
+  .card .value{
+    font-family:'Fraunces',serif;font-size:1.25rem;font-weight:600;word-break:break-word;line-height:1.25;
+  }
+  .card .value.accent{color:var(--cyan);}
+
+  .list-section{margin-bottom:28px;}
+  .list-section h3{font-size:1.02rem;margin-bottom:12px;font-weight:600;}
+  .tag-list{display:flex;flex-wrap:wrap;gap:8px;}
+  .tag{
+    background:var(--wine);border:1px solid var(--line);
+    border-radius:999px;padding:8px 14px;
+    font-size:0.85rem;color:var(--bone);
+  }
+
+  .nearby-section{margin-bottom:28px;}
+  .nearby-section h3{font-size:1.02rem;margin-bottom:12px;font-weight:600;}
+  .nearby-list{display:flex;flex-direction:column;gap:8px;}
+  .nearby-item{
+    background:var(--wine);border:1px solid var(--line);border-radius:10px;
+    padding:12px 16px;font-size:0.9rem;display:flex;justify-content:space-between;gap:12px;
+  }
+  .nearby-item .n-sub{color:var(--mute);font-size:0.82rem;}
+  .empty-note{color:var(--mute);font-size:0.85rem;font-style:italic;}
+
+  .actions{display:flex;gap:12px;margin-top:36px;flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--rose);color:var(--void);padding:13px 22px;border-radius:10px;
+    font-weight:600;font-size:0.9rem;border:none;cursor:pointer;font-family:inherit;
+  }
+  .btn-secondary{
+    padding:13px 22px;border-radius:10px;border:1px solid var(--line);
+    color:var(--bone);font-size:0.9rem;font-weight:500;background:none;cursor:pointer;font-family:inherit;
+  }
+</style>
 </head>
 <body>
 
-  <header>
-    <h1>🏢 Building Analyzer</h1>
-    <nav>
-      <a href="index.html">Upload</a>
-      <a href="history.html">History</a>
-    </nav>
-  </header>
+<nav>
+  <div class="logo"><span class="x">X</span>Trace</div>
+  <a href="index.html" class="back">← Back to home</a>
+</nav>
 
-  <main>
-    <div id="loadingMessage">Loading building details...</div>
+<div class="wrap">
 
-    <div id="detailsContainer" style="display:none;">
-      <img id="buildingImage" src="" alt="Building photo">
-      <h2 id="buildingType">-</h2>
-      <p id="buildingSummary" class="summary"></p>
+  <div class="loading-box" id="loadingBox">
+    <div class="spinner"></div>
+    <h2 id="loadingTitle">Analyzing your building…</h2>
+    <p id="loadingSub">This can take up to 30 seconds.</p>
+  </div>
 
-      <table>
-        <tr><td>Year Built</td><td id="buildingYear">-</td></tr>
-        <tr><td>Floors</td><td id="buildingFloors">-</td></tr>
-        <tr><td>Style</td><td id="buildingStyle">-</td></tr>
-        <tr><td>Condition</td><td id="buildingCondition">-</td></tr>
-        <tr><td>Rental Price</td><td id="buildingRent">-</td></tr>
-        <tr><td>Confidence</td><td id="buildingConfidence">-</td></tr>
-      </table>
+  <div class="error-box" id="errorBox" style="display:none;">
+    <h2>Couldn't load this report</h2>
+    <p id="errorMsg">Something went wrong.</p>
+    <button class="btn-primary" id="retryBtn">Try again</button>
+  </div>
 
-      <h3>Notable Features</h3>
-      <ul id="buildingFeatures"></ul>
+  <div class="result" id="result">
+    <div class="photo"><img id="photo" src="" alt="Scanned building"></div>
 
-      <h3>Amenities</h3>
-      <ul id="buildingAmenities"></ul>
+    <span class="eyebrow" id="statusTag">Scan complete</span>
+    <h1 id="buildingName">Building report</h1>
+    <div class="meta" id="scannedAt"></div>
 
-      <h3>Nearby Hospitals</h3>
-      <ul id="buildingHospitals"></ul>
-
-      <h3>Nearby Schools</h3>
-      <ul id="buildingSchools"></ul>
-
-      <h3>Network Coverage</h3>
-      <p id="buildingNetwork">-</p>
-
-      <a href="index.html"><button>Analyze Another</button></a>
+    <div id="summaryBlock" style="display:none;">
+      <span class="confidence-tag" id="confidenceTag"></span>
+      <div class="summary" id="summaryText"></div>
     </div>
 
-    <p id="errorMessage" style="display:none;">Could not load building details.</p>
-  </main>
-<script src="js/background.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/details.js"></script>
+    <div class="card-grid" id="cardGrid"></div>
+
+    <div class="list-section" id="featuresSection" style="display:none;">
+      <h3>Notable features</h3>
+      <div class="tag-list" id="featuresList"></div>
+    </div>
+
+    <div class="list-section" id="amenitiesSection" style="display:none;">
+      <h3>Visible amenities</h3>
+      <div class="tag-list" id="amenitiesList"></div>
+    </div>
+
+    <div class="nearby-section">
+      <h3>Hospitals nearby</h3>
+      <div class="nearby-list" id="hospitalsList"></div>
+    </div>
+    <div class="nearby-section">
+      <h3>Schools nearby</h3>
+      <div class="nearby-list" id="schoolsList"></div>
+    </div>
+    <div class="nearby-section">
+      <h3>Shopping centers nearby</h3>
+      <div class="nearby-list" id="shoppingList"></div>
+    </div>
+
+    <div class="actions">
+      <a href="upload.html" class="btn-primary">Scan another building</a>
+      <a href="history.html" class="btn-secondary">View history</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API_BASE = "https://xtrace-backend.onrender.com";
+
+  const params = new URLSearchParams(window.location.search);
+  const buildingId = params.get('id');
+
+  const loadingBox = document.getElementById('loadingBox');
+  const loadingTitle = document.getElementById('loadingTitle');
+  const loadingSub = document.getElementById('loadingSub');
+  const errorBox = document.getElementById('errorBox');
+  const errorMsg = document.getElementById('errorMsg');
+  const result = document.getElementById('result');
+
+  document.getElementById('retryBtn').addEventListener('click', () => {
+    window.location.reload();
+  });
+
+  if (!buildingId) {
+    showError('No building ID was provided in the link.');
+  } else {
+    run();
+  }
+
+  async function run() {
+    try {
+      // First check current state
+      let data = await fetchBuilding(buildingId);
+
+      if (data.status !== 'complete') {
+        loadingTitle.textContent = 'Analyzing your building…';
+        loadingSub.textContent = 'Running the scan now — this can take up to 30 seconds.';
+        data = await analyzeBuilding(buildingId);
+      }
+
+      renderResult(data);
+
+    } catch (err) {
+      console.error(err);
+      showError(err.message || 'Could not reach the server. Please check your connection and try again.');
+    }
+  }
+
+  async function fetchBuilding(id) {
+    const res = await fetch(`${API_BASE}/buildings/${id}`, {
+      headers: { 'accept': 'application/json' }
+    });
+    if (!res.ok) throw new Error('Could not find this building (status ' + res.status + ').');
+    return res.json();
+  }
+
+  async function analyzeBuilding(id) {
+    const res = await fetch(`${API_BASE}/buildings/${id}/analyze`, {
+      method: 'POST',
+      headers: { 'accept': 'application/json' }
+    });
+    if (!res.ok) throw new Error('Analysis failed (status ' + res.status + ').');
+    return res.json();
+  }
+
+  function showError(msg) {
+    loadingBox.style.display = 'none';
+    errorBox.style.display = 'block';
+    errorMsg.textContent = msg;
+  }
+
+  function renderResult(data) {
+    loadingBox.style.display = 'none';
+    result.classList.add('show');
+
+    let imgSrc = data.image_url || '';
+    if (imgSrc && !imgSrc.startsWith('http')) {
+      imgSrc = `${API_BASE}/uploads/${imgSrc.replace(/^\/?uploads\//, '')}`;
+    }
+    document.getElementById('photo').src = imgSrc;
+
+    document.getElementById('buildingName').textContent = data.name || `Building #${data.id}`;
+    if (data.created_at) {
+      document.getElementById('scannedAt').textContent = 'Scanned ' + new Date(data.created_at).toLocaleString();
+    }
+
+    let analysis = {};
+    if (data.analysis_json) {
+      analysis = typeof data.analysis_json === 'string'
+        ? safeParse(data.analysis_json)
+        : data.analysis_json;
+    }
+
+    // summary + confidence
+    if (analysis.summary) {
+      document.getElementById('summaryBlock').style.display = 'block';
+      document.getElementById('summaryText').textContent = analysis.summary;
+    }
+    if (analysis.confidence) {
+      document.getElementById('confidenceTag').textContent = analysis.confidence + ' confidence';
+    }
+
+    renderCards(analysis);
+    renderTagList('featuresSection', 'featuresList', analysis.notable_features);
+    renderTagList('amenitiesSection', 'amenitiesList', analysis.visible_amenities);
+
+    renderNearby('hospitalsList', data.hospitals);
+    renderNearby('schoolsList', data.schools);
+    renderNearby('shoppingList', data.shopping_centers);
+  }
+
+  function safeParse(str) {
+    try { return JSON.parse(str); } catch (e) { console.warn('Bad analysis_json', e); return {}; }
+  }
+
+  function prettyLabel(key) {
+    return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  // fields shown as top summary text / lists, not repeated in the card grid
+  const SKIP_IN_GRID = ['summary', 'confidence', 'notable_features', 'visible_amenities'];
+
+  function renderCards(analysis) {
+    const grid = document.getElementById('cardGrid');
+    grid.innerHTML = '';
+
+    const entries = Object.entries(analysis || {}).filter(
+      ([key, val]) => !SKIP_IN_GRID.includes(key) && val !== null && typeof val !== 'object'
+    );
+
+    if (entries.length === 0) {
+      grid.innerHTML = '<div class="empty-note">No additional analysis data was returned for this scan.</div>';
+      return;
+    }
+
+    entries.forEach(([key, value]) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `<div class="label">${prettyLabel(key)}</div><div class="value">${value}</div>`;
+      grid.appendChild(card);
+    });
+  }
+
+  function renderTagList(sectionId, listId, items) {
+    if (!items || !Array.isArray(items) || items.length === 0) return;
+    document.getElementById(sectionId).style.display = 'block';
+    const list = document.getElementById(listId);
+    list.innerHTML = '';
+    items.forEach(item => {
+      const tag = document.createElement('span');
+      tag.className = 'tag';
+      tag.textContent = item;
+      list.appendChild(tag);
+    });
+  }
+
+  function renderNearby(containerId, items) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      container.innerHTML = '<div class="empty-note">None found nearby.</div>';
+      return;
+    }
+
+    items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'nearby-item';
+      if (typeof item === 'string') {
+        row.innerHTML = `<span>${item}</span>`;
+      } else if (typeof item === 'object' && item !== null) {
+        const name = item.name || item.title || JSON.stringify(item);
+        const sub = item.distance || item.address || '';
+        row.innerHTML = `<span>${name}</span><span class="n-sub">${sub}</span>`;
+      } else {
+        row.innerHTML = `<span>${item}</span>`;
+      }
+      container.appendChild(row);
+    });
+  }
+</script>
+
 </body>
 </html>
