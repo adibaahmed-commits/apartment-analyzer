@@ -393,36 +393,92 @@
       container.appendChild(row);
     });
   }
-</script>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const geminiData = localStorage.getItem('gemini_analysis_result');
-        if (geminiData) {
-            const data = JSON.parse(geminiData);
-            
-            // Helper to update lists
-            const updateList = (id, items) => {
-                const container = document.getElementById(id);
-                if (container && items && items.length > 0) {
-                    container.innerHTML = items.map(item => `<li>${item}</li>`).join('');
-                    // Hide "Not detected" message if it exists
-                    const notDetected = container.parentElement.querySelector('.not-detected, .text-gray-500');
-                    if(notDetected) notDetected.style.display = 'none';
-                    
-                    // Show the list container if it was hidden
-                    container.style.display = 'block';
-                }
-            };
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log("🔍 Starting Auto-Diagnosis for Nearby Facilities...");
 
-            updateList('schools-list', data.schools);
-            updateList('hospitals-list', data.hospitals);
-            updateList('shopping-list', data.shopping_centers);
-            
-            // Clear storage after use
+        // 1. Try to get data from localStorage first (from upload page)
+        let facilities = localStorage.getItem('gemini_analysis_result');
+        
+        if (facilities) {
+            console.log("✅ Found data in LocalStorage");
+            updateUI(JSON.parse(facilities));
             localStorage.removeItem('gemini_analysis_result');
+            return;
+        }
+
+        // 2. If no data, try to fetch from the NEW backend endpoint directly
+        console.log("⚠️ No LocalStorage data. Attempting direct API call to Render...");
+        
+        // FIND THE IMAGE SRC
+        const imgElement = document.querySelector('img'); // Adjust selector if needed
+        if (!imgElement || !imgElement.src) {
+            console.error("❌ No image found on page to analyze.");
+            return;
+        }
+
+        const imageUrl = imgElement.src;
+        
+        // FETCH THE IMAGE BLOB
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            
+            // PREPARE FORM DATA
+            const formData = new FormData();
+            formData.append('file', blob, 'image.jpg');
+
+            // CALL YOUR RENDER BACKEND (Replace with your actual Render URL)
+            // IMPORTANT: Change 'https://your-app-name.onrender.com' to your actual URL
+            const backendUrl = 'https://internet-x-ray.onrender.com/api/analyze-with-gps'; 
+            
+            console.log("📡 Sending request to:", backendUrl);
+
+            const apiResponse = await fetch(backendUrl, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!apiResponse.ok) {
+                const errText = await apiResponse.text();
+                throw new Error(`Server error: ${apiResponse.status} - ${errText}`);
+            }
+
+            const data = await apiResponse.json();
+            console.log("✅ Success! Received data:", data);
+            
+            updateUI(data);
+
+        } catch (error) {
+            console.error("❌ Failed to fetch from backend:", error);
+            alert("Could not connect to AI service. Check console for details.");
         }
     });
+
+    // Helper function to update the HTML
+    function updateUI(data) {
+        const updateList = (id, items) => {
+            const container = document.getElementById(id);
+            if (container) {
+                if (items && items.length > 0) {
+                    container.innerHTML = items.map(item => `<li class="text-green-600 font-medium">✓ ${item}</li>`).join('');
+                    // Hide "None found" text if it exists nearby
+                    const parent = container.parentElement;
+                    const noneText = parent.querySelector('.text-gray-500, .text-gray-400');
+                    if(noneText) noneText.style.display = 'none';
+                    container.style.display = 'block';
+                } else {
+                    container.innerHTML = '<li>No specific names detected visually.</li>';
+                }
+            }
+        };
+
+        updateList('schools-list', data.schools);
+        updateList('hospitals-list', data.hospitals);
+        updateList('shopping-list', data.shopping_centers);
+    }
+</script>
 </script>
 </body>
 </html>
