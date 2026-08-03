@@ -395,5 +395,34 @@
   }
 </script>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const geminiData = localStorage.getItem('gemini_analysis_result');
+        if (geminiData) {
+            const data = JSON.parse(geminiData);
+            
+            // Helper to update lists
+            const updateList = (id, items) => {
+                const container = document.getElementById(id);
+                if (container && items && items.length > 0) {
+                    container.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+                    // Hide "Not detected" message if it exists
+                    const notDetected = container.parentElement.querySelector('.not-detected, .text-gray-500');
+                    if(notDetected) notDetected.style.display = 'none';
+                    
+                    // Show the list container if it was hidden
+                    container.style.display = 'block';
+                }
+            };
+
+            updateList('schools-list', data.schools);
+            updateList('hospitals-list', data.hospitals);
+            updateList('shopping-list', data.shopping_centers);
+            
+            // Clear storage after use
+            localStorage.removeItem('gemini_analysis_result');
+        }
+    });
+</script>
 </body>
 </html>
