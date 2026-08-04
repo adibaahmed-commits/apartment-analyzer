@@ -373,8 +373,13 @@
     const container = document.getElementById(containerId);
     container.innerHTML = '';
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      container.innerHTML = '<div class="empty-note">None found nearby.</div>';
+    if (items === null || items === undefined) {
+      container.innerHTML = '<div class="empty-note">Location not available for this photo.</div>';
+      return;
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      container.innerHTML = '<div class="empty-note">No results found nearby.</div>';
       return;
     }
 
