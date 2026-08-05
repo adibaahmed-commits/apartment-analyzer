@@ -287,6 +287,7 @@
   function renderResult(data) {
     loadingBox.style.display = 'none';
     result.classList.add('show');
+    saveToHistory(data);
 
     let imgSrc = data.image_url || '';
     if (imgSrc && !imgSrc.startsWith('http')) {
@@ -393,6 +394,24 @@
       container.appendChild(row);
     });
   }
+
+  function saveToHistory(data) {
+        try {
+          const key = 'xtrace_history';
+          const existing = JSON.parse(localStorage.getItem(key) || '[]');
+          const filtered = existing.filter(entry => entry.id !== data.id);
+          filtered.unshift({
+            id: data.id,
+            name: data.name || null,
+            image_url: data.image_url || null,
+            created_at: data.created_at || new Date().toISOString()
+          });
+          const trimmed = filtered.slice(0, 50);
+          localStorage.setItem(key, JSON.stringify(trimmed));
+        } catch (e) {
+          console.warn('Could not save to history', e);
+        }
+      }
 </script>
 
 </body>
