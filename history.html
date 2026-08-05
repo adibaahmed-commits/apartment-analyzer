@@ -1,35 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Building Analyzer - History</title>
- <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XTrace — Scan History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#170A0D;
+    --wine:#2B0F16;
+    --wine-light:#3D1620;
+    --rose:#E8536B;
+    --rose-dim:#B33D50;
+    --cyan:#5EEAD4;
+    --bone:#F4E9E6;
+    --mute:#A8858C;
+    --line:rgba(244,233,230,0.09);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--void);color:var(--bone);
+    font-family:'Space Grotesk', sans-serif;
+    min-height:100vh;
+  }
+  h1,h2,.display{font-family:'Fraunces', serif;font-weight:600;letter-spacing:-0.01em;}
+  a{color:inherit;text-decoration:none;}
+
+  body::before{
+    content:'';position:fixed;inset:0;
+    background:
+      radial-gradient(ellipse 900px 600px at 15% -5%, rgba(232,83,107,0.14), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 20%, rgba(94,234,212,0.06), transparent 55%);
+    pointer-events:none;z-index:0;
+  }
+
+  nav{
+    position:sticky;top:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 28px;
+    background:rgba(23,10,13,0.72);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{display:flex;align-items:center;gap:8px;font-family:'Fraunces',serif;font-weight:700;font-size:1.3rem;}
+  .logo .x{color:var(--rose);}
+  .back{font-size:0.88rem;color:var(--mute);}
+  .back:hover{color:var(--bone);}
+
+  .wrap{max-width:1000px;margin:0 auto;padding:50px 24px 80px;position:relative;z-index:1;}
+
+  .page-head{margin-bottom:36px;}
+  .eyebrow{
+    font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;
+    color:var(--cyan);font-weight:600;
+  }
+  h1{font-size:clamp(1.8rem,4vw,2.4rem);margin:10px 0 8px;}
+  .page-sub{color:var(--mute);font-size:0.92rem;}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+    gap:18px;
+  }
+  .scan-card{
+    background:var(--wine);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+    transition:transform .15s ease, border-color .15s ease;
+    display:block;
+  }
+  .scan-card:hover{
+    transform:translateY(-3px);
+    border-color:var(--rose-dim);
+  }
+  .scan-card .thumb{
+    width:100%;aspect-ratio:4/3;
+    background:var(--wine-light);
+    overflow:hidden;
+  }
+  .scan-card .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .scan-card .info{padding:14px 16px;}
+  .scan-card .b-name{font-weight:600;font-size:0.95rem;margin-bottom:4px;}
+  .scan-card .b-meta{color:var(--mute);font-size:0.78rem;}
+  .scan-card .b-tag{
+    display:inline-block;
+    font-size:0.68rem;
+    color:var(--cyan);
+    margin-top:8px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding:100px 20px;
+    color:var(--mute);
+  }
+  .empty-state h2{color:var(--bone);font-size:1.3rem;margin-bottom:10px;}
+  .empty-state .btn-primary{
+    display:inline-block;margin-top:20px;
+    background:var(--rose);color:var(--void);
+    padding:13px 24px;border-radius:10px;
+    font-weight:600;font-size:0.9rem;
+  }
+
+  .loading-note{color:var(--mute);font-size:0.85rem;padding:30px 0;text-align:center;}
+</style>
 </head>
 <body>
 
-  <header>
-    <h1>🏢 Building Analyzer</h1>
-    <nav>
-      <a href="index.html">Upload</a>
-      <a href="history.html">History</a>
-    </nav>
-  </header>
+<nav>
+  <div class="logo"><span class="x">X</span>Trace</div>
+  <a href="index.html" class="back">← Back to home</a>
+</nav>
 
-  <main>
-    <h2>Past Uploads</h2>
+<div class="wrap">
+  <div class="page-head">
+    <span class="eyebrow">Your scans</span>
+    <h1>History</h1>
+    <p class="page-sub">Buildings you've scanned from this browser.</p>
+  </div>
 
-    <div id="loadingMessage">Loading history...</div>
-    <div id="emptyMessage" style="display:none;">No buildings analyzed yet.</div>
-    <p id="errorMessage" style="display:none;">Could not load history.</p>
+  <div id="content"></div>
+</div>
 
-    <div id="historyGrid"></div>
-  </main>
-<script src="js/background.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/history.js"></script>
+<script>
+  const API_BASE = "https://xtrace-backend.onrender.com";
+  const content = document.getElementById('content');
+
+  function getLocalHistory() {
+    try {
+      return JSON.parse(localStorage.getItem('xtrace_history') || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function imgUrlFor(raw) {
+    if (!raw) return '';
+    if (raw.startsWith('http')) return raw;
+    return `${API_BASE}/uploads/${raw.replace(/^\/?uploads\//, '')}`;
+  }
+
+  async function init() {
+    const history = getLocalHistory();
+
+    if (history.length === 0) {
+      showEmpty();
+      return;
+    }
+
+    content.innerHTML = '<div class="loading-note">Loading your scans…</div>';
+
+    const results = await Promise.all(
+      history.map(entry =>
+        fetch(`${API_BASE}/buildings/${entry.id}`, { headers: { accept: 'application/json' } })
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null)
+      )
+    );
+
+    const valid = results.filter(r => r !== null);
+
+    if (valid.length === 0) {
+      showEmpty();
+      return;
+    }
+
+    renderGrid(valid);
+  }
+
+  function showEmpty() {
+    content.innerHTML = `
+      <div class="empty-state">
+        <h2>No scans yet</h2>
+        <p>Once you scan a building, it'll show up here.</p>
+        <a href="upload.html" class="btn-primary">Scan your first building</a>
+      </div>
+    `;
+  }
+
+  function renderGrid(buildings) {
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+
+    buildings.forEach(b => {
+      let analysis = {};
+      if (b.analysis_json) {
+        analysis = typeof b.analysis_json === 'string'
+          ? safeParse(b.analysis_json)
+          : b.analysis_json;
+      }
+
+      const card = document.createElement('a');
+      card.className = 'scan-card';
+      card.href = `details.html?id=${b.id}`;
+
+      const dateStr = b.created_at ? new Date(b.created_at).toLocaleDateString() : '';
+
+      card.innerHTML = `
+        <div class="thumb"><img src="${imgUrlFor(b.image_url)}" alt="${b.name || 'Scanned building'}"></div>
+        <div class="info">
+          <div class="b-name">${b.name || analysis.building_type || `Building #${b.id}`}</div>
+          <div class="b-meta">${dateStr}</div>
+          ${analysis.estimated_rental_price ? `<div class="b-tag">${analysis.estimated_rental_price}</div>` : ''}
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    content.innerHTML = '';
+    content.appendChild(grid);
+  }
+
+  function safeParse(str) {
+    try { return JSON.parse(str); } catch (e) { return {}; }
+  }
+
+  init();
+</script>
+
 </body>
 </html>
